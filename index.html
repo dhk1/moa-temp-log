@@ -539,26 +539,26 @@ const FRIDGES = [
   {
     id: 'food',
     name: 'Food Fridge',
-    target: { min: 33, max: 40 },
+    target: { min: 33, max: 41 },
     excludeLocations: ['30th-ave', 'sunnyside'],
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 10h16"/><path d="M8 6.2v1.2"/><path d="M8 13.5v3"/></svg>`,
   },
   {
     id: 'milk',
     name: 'Milk Fridge',
-    target: { min: 33, max: 40 },
+    target: { min: 33, max: 41 },
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 3.5v3h.3a2.5 2.5 0 0 1 2.5 2.5V20a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2.5 2.5 0 0 1 2.5-2.5H10V5.5L9 2z"/><path d="M9.5 14h5"/></svg>`,
   },
   {
     id: 'retail',
     name: 'Retail Fridge',
-    target: { min: 33, max: 40 },
+    target: { min: 33, max: 41 },
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 9h16"/><path d="M4 15h16"/><circle cx="18" cy="12" r="0.6" fill="currentColor"/><circle cx="18" cy="18" r="0.6" fill="currentColor"/></svg>`,
   },
   {
     id: 'cold-brew',
     name: 'Cold Brew Fridge',
-    target: { min: 33, max: 40 },
+    target: { min: 33, max: 41 },
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8z"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/><path d="M9 14h6"/></svg>`,
   },
 ];
@@ -684,6 +684,7 @@ function renderApp() {
   `;
   renderDate();
   setInterval(renderDate, 30_000);
+  if (SHEETS_ENDPOINT) pruneLogsToToday();
   refreshAll();
   renderLogs();
 }
@@ -729,6 +730,7 @@ function renderDate() {
     lastRenderedDay = day;
   } else if (day !== lastRenderedDay) {
     lastRenderedDay = day;
+    if (SHEETS_ENDPOINT) pruneLogsToToday();
     renderLogs();
     refreshAll();
   }
@@ -952,6 +954,15 @@ function todayStart() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   return d.getTime();
+}
+// Keep only today's entries on-device; older days live in the Google Sheet (the record).
+// Mechanism only — callers gate on SHEETS_ENDPOINT so we never drop the sole copy while
+// sync is off. The offline sync queue (STORAGE_KEY_QUEUE) is separate and never touched here.
+function pruneLogsToToday() {
+  const cutoff = todayStart();
+  const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS) || '[]');
+  const kept = logs.filter(l => new Date(l.timestamp).getTime() >= cutoff);
+  if (kept.length !== logs.length) localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kept));
 }
 function getLogsToday() {
   const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS) || '[]');
