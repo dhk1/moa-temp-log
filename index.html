@@ -586,6 +586,7 @@ const STORAGE_KEY_LOGS = 'moa_temp_logs_v3';
 const STORAGE_KEY_NAME = 'moa_temp_name_v3';
 const STORAGE_KEY_NAMES = 'moa_temp_names_v3';
 const STORAGE_KEY_QUEUE = 'moa_temp_sync_queue_v1';
+const STORAGE_KEY_LOC = 'moa_temp_loc_v1'; // remembers this device's location; iOS Add-to-Home-Screen can drop the ?loc
 
 // ════════════════════════════════════════════════════════════════════
 // Paste your Google Apps Script Web App URL between the quotes below.
@@ -599,11 +600,17 @@ let currentLocation = null;
 function route() {
   let locId = null;
   try { locId = new URLSearchParams(window.location.search).get('loc'); } catch (e) {}
+  // iOS "Add to Home Screen" can launch without the ?loc query, so fall back to the
+  // last location used on this device.
+  if (!locId) {
+    try { locId = localStorage.getItem(STORAGE_KEY_LOC); } catch (e) {}
+  }
   currentLocation = LOCATIONS.find(l => l.id === locId) || null;
   if (!currentLocation) {
     document.title = 'Moa Coffee · Temp Log';
     renderLanding();
   } else {
+    try { localStorage.setItem(STORAGE_KEY_LOC, currentLocation.id); } catch (e) {}
     document.title = `${currentLocation.short} · Moa Temp Log`;
     renderApp();
   }
@@ -612,6 +619,7 @@ function goToLocation(locId) {
   const loc = LOCATIONS.find(l => l.id === locId);
   if (!loc) return;
   currentLocation = loc;
+  try { localStorage.setItem(STORAGE_KEY_LOC, locId); } catch (e) {}
   try { history.pushState({}, '', `?loc=${locId}`); } catch (e) {}
   document.title = `${loc.short} · Moa Temp Log`;
   renderApp();
