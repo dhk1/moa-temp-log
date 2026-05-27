@@ -624,6 +624,7 @@ function renderLanding() {
 let knownNames = [];
 try { knownNames = JSON.parse(localStorage.getItem(STORAGE_KEY_NAMES) || '[]'); } catch { knownNames = []; }
 let savedName = localStorage.getItem(STORAGE_KEY_NAME) || '';
+let lastRenderedDay = null; // tracks the local day so day-scoped views roll over at midnight
 
 // ============ APP RENDER ============
 // Fridges shown at the current location — some shops don't have every fridge.
@@ -719,6 +720,18 @@ function renderDate() {
   const tEl = document.getElementById('dateTime');
   if (dateEl) dateEl.textContent = fullDate;
   if (tEl) tEl.textContent = time;
+
+  // The iPads keep this page open for days, so nothing else triggers a refresh.
+  // When the local day rolls over (midnight), reset the day-scoped views: clear
+  // "Today's log" and the per-fridge "last logged" labels. In-progress inputs are untouched.
+  const day = todayStart();
+  if (lastRenderedDay === null) {
+    lastRenderedDay = day;
+  } else if (day !== lastRenderedDay) {
+    lastRenderedDay = day;
+    renderLogs();
+    refreshAll();
+  }
 }
 
 // ============ NAME ============
