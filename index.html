@@ -648,7 +648,7 @@ function renderApp() {
         <div class="name-label">Logged by</div>
         <div class="name-input-wrap">
           <input type="text" class="name-input" id="nameInput" placeholder="Type your name" autocomplete="off"
-            value="${escapeAttr(savedName)}"
+            value=""
             oninput="onNameInput()"
             onfocus="onNameInput()"
             onblur="setTimeout(()=>document.getElementById('autocompleteList').classList.remove('visible'),150)">
@@ -942,6 +942,8 @@ function submitAll() {
   });
   document.getElementById('notesBlock').classList.remove('visible');
   document.getElementById('notesInputs').innerHTML = '';
+  // Clear the name too — shared iPads, so the next barista enters their own.
+  document.getElementById('nameInput').value = '';
 
   refreshAll();
   renderLogs();
