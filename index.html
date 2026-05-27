@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5efe6">
+<title>Moa Coffee · Temp Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5efe6;
+  --cream-light: #fbf7f1;
+  --cream-dark: #ebe3d4;
+  --espresso: #1f1410;
+  --espresso-soft: #3d2a20;
+  --ink: #2a1f18;
+  --muted: #8a7560;
+  --line: #d9cdb8;
+  --terracotta: #c2632f;
+  --terracotta-dark: #a04e22;
+  --green: #3d6b4a;
+  --green-soft: #e8f0e6;
+  --amber: #d4843b;
+  --amber-soft: #fbeede;
+  --red: #a8473f;
+  --red-soft: #f5e6e4;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(194, 99, 47, 0.035) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(61, 42, 32, 0.025) 0%, transparent 50%);
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 20px 24px;
+}
+
+/* ─────── HEADER ─────── */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.brand {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 18px;
+  font-variation-settings: 'opsz' 144, 'SOFT' 100;
+  letter-spacing: -0.01em;
+}
+.brand .dot { color: var(--terracotta); margin: 0 4px; }
+.brand .sub {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+.location-pill {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--espresso);
+  color: var(--cream);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─────── DATE STRIP ─────── */
+.date-strip {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+.date {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  font-variation-settings: 'opsz' 144, 'SOFT' 80;
+  letter-spacing: -0.015em;
+  line-height: 1;
+}
+.date-time {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────── NAME BAR ─────── */
+.name-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.name-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.name-input-wrap { flex: 1; position: relative; }
+.name-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--ink);
+  padding: 2px 0;
+  letter-spacing: -0.01em;
+}
+.name-input::placeholder { color: var(--line); font-style: italic; }
+
+.autocomplete-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -8px;
+  right: -8px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 6px 20px rgba(31, 20, 16, 0.1);
+  display: none;
+}
+.autocomplete-list.visible { display: block; }
+.autocomplete-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.autocomplete-item:hover { background: var(--cream); }
+
+/* ─────── FRIDGE ROWS ─────── */
+.fridge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.fridge-row {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.fridge-row.has-value { border-color: var(--cream-dark); }
+
+.fridge-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--espresso-soft);
+}
+.fridge-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.2;
+}
+.fridge-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.005em;
+}
+.fridge-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.fridge-sub .target { letter-spacing: 0.06em; text-transform: uppercase; }
+.fridge-sub .feedback {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 12px;
+  letter-spacing: 0;
+  display: none;
+}
+.fridge-sub .feedback.visible { display: inline; }
+.fridge-sub .feedback.in-range { color: var(--green); }
+.fridge-sub .feedback.warning { color: var(--amber); }
+.fridge-sub .feedback.out-of-range { color: var(--red); }
+.fridge-sub .last {
+  letter-spacing: 0;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.temp-wrap { position: relative; flex-shrink: 0; }
+.temp-input {
+  width: 92px;
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 24px;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50;
+  text-align: center;
+  padding: 10px 24px 10px 10px;
+  background: var(--cream-light);
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  outline: none;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  transition: all 0.18s;
+  -moz-appearance: textfield;
+}
+.temp-input::-webkit-outer-spin-button,
+.temp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.temp-input::placeholder { color: var(--line); }
+.temp-input:focus { border-color: var(--espresso); background: white; }
+.temp-input.in-range { border-color: var(--green); background: var(--green-soft); color: var(--green); }
+.temp-input.warning { border-color: var(--amber); background: var(--amber-soft); color: var(--amber); }
+.temp-input.out-of-range { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+.temp-unit {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* ─────── NOTES (inline, when needed) ─────── */
+.notes-block {
+  display: none;
+  margin: 8px 0 16px;
+  background: var(--red-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.notes-block.visible { display: block; animation: slideIn 0.25s; }
+.notes-block .head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 10.5px;
+  color: var(--red);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.notes-block .which {
+  background: white;
+  color: var(--red);
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  font-size: 10.5px;
+}
+.notes-input {
+  width: 100%;
+  background: white;
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  margin-bottom: 6px;
+}
+.notes-input:last-child { margin-bottom: 0; }
+.notes-input:focus { border-color: var(--red); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────── SUBMIT BUTTON ─────── */
+.submit-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 30;
+  padding-top: 4px;
+}
+.submit-btn {
+  width: 100%;
+  background: var(--espresso);
+  color: var(--cream);
+  border: none;
+  border-radius: 14px;
+  padding: 17px 22px;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.005em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 8px 24px rgba(31, 20, 16, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.submit-btn:hover { background: var(--espresso-soft); }
+.submit-btn:active { transform: scale(0.99); }
+.submit-btn:disabled {
+  background: var(--cream-dark);
+  color: var(--muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.submit-count {
+  background: rgba(255,255,255,0.18);
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.submit-btn:disabled .submit-count { background: rgba(0,0,0,0.05); }
+
+/* ─────── LOGS ─────── */
+.logs-section { margin-top: 22px; }
+.logs-heading {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.export-btn {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  color: var(--terracotta);
+  cursor: pointer;
+  padding: 4px 0;
+}
+.export-btn:hover { color: var(--terracotta-dark); }
+
+.sync-status {
+  display: none;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: 2px;
+  cursor: pointer;
+}
+.sync-status.visible { display: inline-block; }
+.sync-status.pending { background: var(--amber-soft); color: var(--amber); }
+.sync-status.syncing { background: var(--cream-dark); color: var(--muted); }
+.sync-status.synced { background: var(--green-soft); color: var(--green); }
+.sync-status.error { background: var(--red-soft); color: var(--red); }
+
+.log-entry {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--cream-light);
+  border-radius: 10px;
+  margin-bottom: 5px;
+  font-size: 13.5px;
+}
+.log-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+.log-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.log-fridge { font-weight: 500; font-size: 13.5px; }
+.log-name {
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.log-temp {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'opsz' 144;
+}
+.log-temp.in-range { color: var(--green); }
+.log-temp.warning { color: var(--amber); }
+.log-temp.out-of-range { color: var(--red); }
+.log-empty {
+  text-align: center;
+  color: var(--muted);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  padding: 18px;
+  font-size: 14px;
+}
+
+/* ─────── TOAST ─────── */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--espresso);
+  color: var(--cream);
+  padding: 13px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  box-shadow: 0 10px 28px rgba(31, 20, 16, 0.25);
+  opacity: 0;
+  transition: all 0.32s cubic-bezier(0.34, 1.4, 0.64, 1);
+  z-index: 100;
+  pointer-events: none;
+  max-width: 90%;
+  text-align: center;
+}
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─────── LANDING ─────── */
+.landing {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 50px 22px;
+}
+.landing h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 36px;
+  font-variation-settings: 'opsz' 144, 'SOFT' 80;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  line-height: 1.1;
+}
+.landing .sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+.landing-list { display: flex; flex-direction: column; gap: 10px; }
+.landing-link {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+  text-decoration: none;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s;
+}
+.landing-link:hover { border-color: var(--espresso); transform: translateY(-1px); }
+.landing-link .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.005em;
+}
+.landing-link .arrow { color: var(--terracotta); font-size: 20px; }
+.landing-note {
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: var(--cream-light);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ─────── RESPONSIVE ─────── */
+@media (max-width: 420px) {
+  .app { padding: 16px 14px 20px; }
+  .fridge-row { padding: 11px 12px; gap: 10px; }
+  .fridge-name { font-size: 15px; }
+  .temp-input { width: 86px; font-size: 22px; padding: 9px 22px 9px 8px; }
+  .date { font-size: 20px; }
+  .submit-btn { padding: 16px 20px; font-size: 15px; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast" id="toast">✓ Logged</div>
+
+<script>
+// ============ DATA ============
+const LOCATIONS = [
+  { id: '30th-ave', name: '30th Ave · Astoria', short: '30th Ave' },
+  { id: 'broadway', name: 'Broadway', short: 'Broadway' },
+  { id: 'sunnyside', name: 'Sunnyside', short: 'Sunnyside' },
+  { id: 'woodside', name: 'Woodside', short: 'Woodside' },
+];
+
+const FRIDGES = [
+  {
+    id: 'food',
+    name: 'Food Fridge',
+    target: { min: 33, max: 40 },
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 10h16"/><path d="M8 6.2v1.2"/><path d="M8 13.5v3"/></svg>`,
+  },
+  {
+    id: 'milk',
+    name: 'Milk Fridge',
+    target: { min: 33, max: 40 },
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 3.5v3h.3a2.5 2.5 0 0 1 2.5 2.5V20a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2.5 2.5 0 0 1 2.5-2.5H10V5.5L9 2z"/><path d="M9.5 14h5"/></svg>`,
+  },
+  {
+    id: 'retail',
+    name: 'Retail Fridge',
+    target: { min: 33, max: 40 },
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 9h16"/><path d="M4 15h16"/><circle cx="18" cy="12" r="0.6" fill="currentColor"/><circle cx="18" cy="18" r="0.6" fill="currentColor"/></svg>`,
+  },
+  {
+    id: 'cold-brew',
+    name: 'Cold Brew Fridge',
+    target: { min: 33, max: 40 },
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8z"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/><path d="M9 14h6"/></svg>`,
+  },
+];
+
+const STORAGE_KEY_LOGS = 'moa_temp_logs_v3';
+const STORAGE_KEY_NAME = 'moa_temp_name_v3';
+const STORAGE_KEY_NAMES = 'moa_temp_names_v3';
+const STORAGE_KEY_QUEUE = 'moa_temp_sync_queue_v1';
+
+// ════════════════════════════════════════════════════════════════════
+// Paste your Google Apps Script Web App URL between the quotes below.
+// Leave blank to disable Google Sheets sync (form will still work locally).
+const SHEETS_ENDPOINT = '';
+// ════════════════════════════════════════════════════════════════════
+
+// ============ ROUTING ============
+let currentLocation = null;
+
+function route() {
+  let locId = null;
+  try { locId = new URLSearchParams(window.location.search).get('loc'); } catch (e) {}
+  currentLocation = LOCATIONS.find(l => l.id === locId) || null;
+  if (!currentLocation) {
+    document.title = 'Moa Coffee · Temp Log';
+    renderLanding();
+  } else {
+    document.title = `${currentLocation.short} · Moa Temp Log`;
+    renderApp();
+  }
+}
+function goToLocation(locId) {
+  const loc = LOCATIONS.find(l => l.id === locId);
+  if (!loc) return;
+  currentLocation = loc;
+  try { history.pushState({}, '', `?loc=${locId}`); } catch (e) {}
+  document.title = `${loc.short} · Moa Temp Log`;
+  renderApp();
+}
+window.addEventListener('popstate', route);
+
+// ============ LANDING ============
+function renderLanding() {
+  document.getElementById('root').innerHTML = `
+    <div class="landing">
+      <h1>Moa Coffee<span style="color:var(--terracotta)"> · </span>Temp Log</h1>
+      <p class="sub">Choose your location. Bookmark this page on your iPad so you don't have to do this again.</p>
+      <div class="landing-list">
+        ${LOCATIONS.map(loc => `
+          <a href="?loc=${loc.id}" class="landing-link" onclick="event.preventDefault(); goToLocation('${loc.id}')">
+            <span class="name">${loc.name}</span>
+            <span class="arrow">→</span>
+          </a>
+        `).join('')}
+      </div>
+      <div class="landing-note">
+        <strong>Tip:</strong> On each iPad, open that location's link and add it to the home screen (Safari → Share → Add to Home Screen). The barista taps it like an app.
+      </div>
+    </div>
+  `;
+}
+
+// ============ APP STATE ============
+let knownNames = [];
+try { knownNames = JSON.parse(localStorage.getItem(STORAGE_KEY_NAMES) || '[]'); } catch { knownNames = []; }
+let savedName = localStorage.getItem(STORAGE_KEY_NAME) || '';
+
+// ============ APP RENDER ============
+function renderApp() {
+  document.getElementById('root').innerHTML = `
+    <div class="app">
+      <header>
+        <div class="brand">Moa Coffee<span class="dot">·</span><span class="sub">Temp Log</span></div>
+        <div class="location-pill">${currentLocation.short}</div>
+      </header>
+
+      <div class="date-strip">
+        <div class="date" id="dateDisplay">—</div>
+        <div class="date-time" id="dateTime">—</div>
+      </div>
+
+      <div class="name-bar">
+        <div class="name-label">Logged by</div>
+        <div class="name-input-wrap">
+          <input type="text" class="name-input" id="nameInput" placeholder="Type your name" autocomplete="off"
+            value="${escapeAttr(savedName)}"
+            oninput="onNameInput()"
+            onfocus="onNameInput()"
+            onblur="setTimeout(()=>document.getElementById('autocompleteList').classList.remove('visible'),150)">
+          <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+      </div>
+
+      <div class="fridge-list">
+        ${FRIDGES.map(f => renderFridgeRow(f)).join('')}
+      </div>
+
+      <div class="notes-block" id="notesBlock">
+        <div class="head"><span>⚠ Out of range — corrective action required</span></div>
+        <div id="notesInputs"></div>
+      </div>
+
+      <div class="submit-bar">
+        <button class="submit-btn" id="submitBtn" onclick="submitAll()" disabled>
+          <span id="submitLabel">Log temperatures</span>
+          <span class="submit-count" id="submitCount">0</span>
+        </button>
+      </div>
+
+      <div class="logs-section">
+        <div class="logs-heading">
+          <span>Today's log <span class="sync-status" id="syncStatus" onclick="manualSync()"></span></span>
+          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+        </div>
+        <div id="logsContainer">
+          <div class="log-empty">No entries yet today.</div>
+        </div>
+      </div>
+    </div>
+  `;
+  renderDate();
+  setInterval(renderDate, 30_000);
+  refreshAll();
+  renderLogs();
+}
+
+function renderFridgeRow(f) {
+  return `
+    <div class="fridge-row" id="row-${f.id}">
+      <div class="fridge-icon">${f.icon}</div>
+      <div class="fridge-meta">
+        <div class="fridge-name">${f.name}</div>
+        <div class="fridge-sub">
+          <span class="target">${f.target.min}–${f.target.max}°F</span>
+          <span class="feedback" id="feedback-${f.id}"></span>
+          <span class="last" id="last-${f.id}"></span>
+        </div>
+      </div>
+      <div class="temp-wrap">
+        <input type="number" inputmode="decimal" step="0.1" class="temp-input" id="temp-${f.id}"
+          placeholder="—"
+          oninput="onTempInput('${f.id}')"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();submitAll();}">
+        <span class="temp-unit">°F</span>
+      </div>
+    </div>
+  `;
+}
+
+// ============ DATE ============
+function renderDate() {
+  const now = new Date();
+  const fullDate = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const dateEl = document.getElementById('dateDisplay');
+  const tEl = document.getElementById('dateTime');
+  if (dateEl) dateEl.textContent = fullDate;
+  if (tEl) tEl.textContent = time;
+}
+
+// ============ NAME ============
+function onNameInput() {
+  const input = document.getElementById('nameInput');
+  const list = document.getElementById('autocompleteList');
+  if (!input || !list) return;
+  savedName = input.value.trim();
+  if (savedName) localStorage.setItem(STORAGE_KEY_NAME, savedName);
+  const val = input.value.toLowerCase().trim();
+  const matches = knownNames
+    .filter(n => (val === '' || n.toLowerCase().includes(val)) && n.toLowerCase() !== val)
+    .slice(0, 5);
+  if (matches.length === 0) { list.classList.remove('visible'); return; }
+  list.innerHTML = matches.map(n =>
+    `<div class="autocomplete-item" onmousedown="selectName('${escapeAttr(n)}')">${escapeHtml(n)}</div>`
+  ).join('');
+  list.classList.add('visible');
+}
+function selectName(name) {
+  const input = document.getElementById('nameInput');
+  input.value = name;
+  savedName = name;
+  localStorage.setItem(STORAGE_KEY_NAME, name);
+  document.getElementById('autocompleteList').classList.remove('visible');
+}
+
+// ============ TEMP STATUS ============
+function tempStatus(temp, target) {
+  const t = parseFloat(temp);
+  if (isNaN(t)) return { cls: '', msg: '' };
+  if (t < target.min) return { cls: 'warning', msg: 'Below target.' };
+  if (t > target.max + 1) return { cls: 'out-of-range', msg: 'Above range.' };
+  if (t > target.max) return { cls: 'warning', msg: 'Top of range.' };
+  return { cls: 'in-range', msg: 'In range.' };
+}
+
+function onTempInput(fridgeId) {
+  const input = document.getElementById(`temp-${fridgeId}`);
+  const feedback = document.getElementById(`feedback-${fridgeId}`);
+  const row = document.getElementById(`row-${fridgeId}`);
+  const last = document.getElementById(`last-${fridgeId}`);
+  const fridge = FRIDGES.find(f => f.id === fridgeId);
+  input.classList.remove('in-range', 'warning', 'out-of-range');
+  feedback.classList.remove('visible', 'in-range', 'warning', 'out-of-range');
+  if (input.value === '') {
+    row.classList.remove('has-value');
+    feedback.textContent = '';
+    // Restore "last:" text if any
+    refreshLastLabel(fridgeId);
+    refreshNotesBlock();
+    refreshSubmitButton();
+    return;
+  }
+  // Hide "last:" while editing
+  if (last) last.textContent = '';
+  row.classList.add('has-value');
+  const status = tempStatus(input.value, fridge.target);
+  if (status.cls) {
+    input.classList.add(status.cls);
+    feedback.classList.add('visible', status.cls);
+    feedback.textContent = '· ' + status.msg;
+  }
+  refreshNotesBlock();
+  refreshSubmitButton();
+}
+
+// ============ NOTES BLOCK ============
+function refreshNotesBlock() {
+  const block = document.getElementById('notesBlock');
+  const inputsHost = document.getElementById('notesInputs');
+  if (!block || !inputsHost) return;
+  const outFridges = FRIDGES.filter(f => {
+    const v = document.getElementById(`temp-${f.id}`).value.trim();
+    if (!v) return false;
+    return tempStatus(v, f.target).cls === 'out-of-range';
+  });
+  if (outFridges.length === 0) {
+    block.classList.remove('visible');
+    inputsHost.innerHTML = '';
+    return;
+  }
+  block.classList.add('visible');
+  // Preserve existing values
+  const existing = {};
+  outFridges.forEach(f => {
+    const e = document.getElementById(`notes-${f.id}`);
+    if (e) existing[f.id] = e.value;
+  });
+  inputsHost.innerHTML = outFridges.map(f => `
+    <input type="text" class="notes-input" id="notes-${f.id}"
+      placeholder="${escapeAttr(f.name)} — corrective action (e.g. adjusted thermostat, moved items)"
+      value="${escapeAttr(existing[f.id] || '')}">
+  `).join('');
+}
+
+// ============ SUBMIT BUTTON STATE ============
+function refreshSubmitButton() {
+  const btn = document.getElementById('submitBtn');
+  const label = document.getElementById('submitLabel');
+  const count = document.getElementById('submitCount');
+  if (!btn) return;
+  const filled = FRIDGES.filter(f => document.getElementById(`temp-${f.id}`).value.trim() !== '');
+  count.textContent = filled.length;
+  if (filled.length === 0) {
+    btn.disabled = true;
+    label.textContent = 'Log temperatures';
+  } else if (filled.length === FRIDGES.length) {
+    btn.disabled = false;
+    label.textContent = 'Log all temperatures';
+  } else {
+    btn.disabled = false;
+    label.textContent = filled.length === 1 ? 'Log temperature' : 'Log temperatures';
+  }
+}
+
+// ============ SUBMIT ============
+function submitAll() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) {
+    document.getElementById('nameInput').focus();
+    showToast('Type your name first', true);
+    return;
+  }
+  const filled = FRIDGES
+    .map(f => ({ fridge: f, val: document.getElementById(`temp-${f.id}`).value.trim() }))
+    .filter(x => x.val !== '');
+  if (filled.length === 0) {
+    showToast('Enter at least one temperature', true);
+    return;
+  }
+  // Validate out-of-range require notes
+  for (const { fridge, val } of filled) {
+    const s = tempStatus(val, fridge.target);
+    if (s.cls === 'out-of-range') {
+      const n = document.getElementById(`notes-${fridge.id}`);
+      if (!n || !n.value.trim()) {
+        if (n) n.focus();
+        showToast(`Add corrective action for ${fridge.name}`, true);
+        return;
+      }
+    }
+  }
+
+  const now = new Date();
+  const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS) || '[]');
+  for (const { fridge, val } of filled) {
+    const s = tempStatus(val, fridge.target);
+    const notesEl = document.getElementById(`notes-${fridge.id}`);
+    logs.push({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      timestamp: now.toISOString(),
+      date: now.toLocaleDateString('en-US'),
+      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      location: currentLocation.id,
+      locationName: currentLocation.name,
+      fridge: fridge.id,
+      fridgeName: fridge.name,
+      name: name,
+      temp: parseFloat(val),
+      status: s.cls || 'in-range',
+      notes: notesEl ? notesEl.value.trim() : '',
+    });
+  }
+  localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+
+  // ─── Sync to Google Sheets ──────────────────────────────────
+  const batch = filled.map(({ fridge, val }) => {
+    const s = tempStatus(val, fridge.target);
+    const notesEl = document.getElementById(`notes-${fridge.id}`);
+    return {
+      timestamp: now.toISOString(),
+      date: now.toLocaleDateString('en-US'),
+      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      fridgeName: fridge.name,
+      name: name,
+      temp: parseFloat(val),
+      status: s.cls || 'in-range',
+      notes: notesEl ? notesEl.value.trim() : '',
+    };
+  });
+  syncBatch({
+    location: currentLocation.id,
+    locationName: currentLocation.name,
+    locationShort: currentLocation.short,
+    entries: batch,
+  });
+
+  // Track name
+  if (!knownNames.find(n => n.toLowerCase() === name.toLowerCase())) {
+    knownNames.push(name);
+    localStorage.setItem(STORAGE_KEY_NAMES, JSON.stringify(knownNames));
+  }
+  localStorage.setItem(STORAGE_KEY_NAME, name);
+
+  // Reset inputs
+  FRIDGES.forEach(f => {
+    const t = document.getElementById(`temp-${f.id}`);
+    const fb = document.getElementById(`feedback-${f.id}`);
+    const row = document.getElementById(`row-${f.id}`);
+    t.value = '';
+    t.classList.remove('in-range', 'warning', 'out-of-range');
+    fb.classList.remove('visible', 'in-range', 'warning', 'out-of-range');
+    fb.textContent = '';
+    row.classList.remove('has-value');
+  });
+  document.getElementById('notesBlock').classList.remove('visible');
+  document.getElementById('notesInputs').innerHTML = '';
+
+  refreshAll();
+  renderLogs();
+  refreshSubmitButton();
+  showToast(`✓ Logged ${filled.length} ${filled.length === 1 ? 'temperature' : 'temperatures'}`);
+}
+
+// ============ LOG QUERIES ============
+function todayStart() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function getLogsToday() {
+  const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS) || '[]');
+  return logs.filter(l =>
+    new Date(l.timestamp).getTime() >= todayStart() &&
+    l.location === currentLocation.id
+  );
+}
+function getLastLogToday(fridgeId) {
+  const logs = getLogsToday().filter(l => l.fridge === fridgeId);
+  return logs.length ? logs[logs.length - 1] : null;
+}
+function refreshLastLabel(fridgeId) {
+  const last = getLastLogToday(fridgeId);
+  const el = document.getElementById(`last-${fridgeId}`);
+  if (!el) return;
+  el.textContent = last ? `· last ${last.temp}°F at ${last.time}` : '';
+}
+function refreshAll() {
+  FRIDGES.forEach(f => refreshLastLabel(f.id));
+  renderSyncStatus();
+}
+function renderLogs() {
+  const container = document.getElementById('logsContainer');
+  if (!container) return;
+  const logs = getLogsToday().slice().reverse();
+  if (logs.length === 0) {
+    container.innerHTML = '<div class="log-empty">No entries yet today.</div>';
+    return;
+  }
+  container.innerHTML = logs.map(l => `
+    <div class="log-entry">
+      <div class="log-time">${l.time}</div>
+      <div class="log-info">
+        <div class="log-fridge">${escapeHtml(l.fridgeName)}</div>
+        <div class="log-name">${escapeHtml(l.name)}${l.notes ? ' · ' + escapeHtml(l.notes) : ''}</div>
+      </div>
+      <div class="log-temp ${l.status}">${l.temp}°F</div>
+    </div>
+  `).join('');
+}
+
+// ============ HELPERS ============
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+function escapeAttr(str) { return String(str).replace(/"/g, '&quot;').replace(/'/g, "\\'"); }
+
+// ============ SHEETS SYNC ============
+function getQueue() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_QUEUE) || '[]'); }
+  catch { return []; }
+}
+function setQueue(q) {
+  localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(q));
+}
+function enqueue(payload) {
+  const q = getQueue();
+  q.push({ id: Date.now() + '_' + Math.random().toString(36).slice(2, 7), payload, attempts: 0 });
+  setQueue(q);
+  renderSyncStatus();
+}
+
+async function postToSheets(payload) {
+  if (!SHEETS_ENDPOINT) throw new Error('No endpoint configured');
+  // text/plain avoids the CORS preflight that Apps Script can't answer.
+  const res = await fetch(SHEETS_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json().catch(() => ({}));
+  if (data && data.ok === false) throw new Error(data.error || 'Server rejected');
+  return data;
+}
+
+async function syncBatch(payload) {
+  if (!SHEETS_ENDPOINT) return; // Sync disabled; logs stay local.
+  renderSyncStatus('syncing');
+  try {
+    await postToSheets(payload);
+    renderSyncStatus('synced');
+    setTimeout(renderSyncStatus, 2500);
+  } catch (err) {
+    enqueue(payload);
+    renderSyncStatus();
+    console.warn('Sync failed, queued:', err);
+  }
+}
+
+async function drainQueue() {
+  if (!SHEETS_ENDPOINT) return;
+  let q = getQueue();
+  if (q.length === 0) { renderSyncStatus(); return; }
+  renderSyncStatus('syncing');
+  const remaining = [];
+  for (const item of q) {
+    try {
+      await postToSheets(item.payload);
+    } catch (err) {
+      item.attempts = (item.attempts || 0) + 1;
+      remaining.push(item);
+    }
+  }
+  setQueue(remaining);
+  renderSyncStatus(remaining.length === 0 ? 'synced' : 'error');
+  if (remaining.length === 0) setTimeout(renderSyncStatus, 2500);
+}
+
+function manualSync() {
+  if (getQueue().length === 0) return;
+  drainQueue();
+}
+
+function renderSyncStatus(state) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const pending = getQueue().length;
+  el.classList.remove('visible', 'pending', 'syncing', 'synced', 'error');
+  if (state === 'syncing') {
+    el.classList.add('visible', 'syncing');
+    el.textContent = 'Syncing…';
+    el.title = '';
+  } else if (state === 'synced') {
+    el.classList.add('visible', 'synced');
+    el.textContent = '✓ Synced';
+    el.title = '';
+  } else if (state === 'error' || pending > 0) {
+    el.classList.add('visible', 'pending');
+    el.textContent = `⟳ ${pending} pending`;
+    el.title = 'Tap to retry';
+  } else {
+    // Idle and queue empty: hide
+    el.textContent = '';
+  }
+}
+
+// Retry pending logs on load and whenever the tab regains focus / network.
+window.addEventListener('online', drainQueue);
+window.addEventListener('focus', drainQueue);
+setTimeout(drainQueue, 1500);
+
+// ============ TOAST ============
+let toastTimer;
+function showToast(msg, isError) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = isError ? 'var(--red)' : 'var(--espresso)';
+  toast.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+// ============ EXPORT ============
+function exportCSV() {
+  const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS) || '[]')
+    .filter(l => l.location === currentLocation.id);
+  if (logs.length === 0) { showToast('No logs to export yet', true); return; }
+  const headers = ['Timestamp', 'Date', 'Time', 'Location', 'Fridge', 'Name', 'Temp (°F)', 'Status', 'Notes'];
+  const rows = logs.map(l => [l.timestamp, l.date, l.time, l.locationName, l.fridgeName, l.name, l.temp, l.status, l.notes]);
+  const csv = [headers, ...rows]
+    .map(r => r.map(c => `"${String(c == null ? '' : c).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `moa-temp-log-${currentLocation.id}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`✓ Exported ${logs.length} entries`);
+}
+
+// ============ BOOTSTRAP ============
+// Must run after the top-level `let` state (knownNames, savedName) is initialized.
+// Calling route() before those declarations throws a temporal-dead-zone
+// ReferenceError that aborts the script and leaves #root empty.
+route();
+</script>
+</body>
+</html>
