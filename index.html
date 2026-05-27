@@ -555,6 +555,7 @@ const FRIDGES = [
     id: 'food',
     name: 'Food Fridge',
     target: { min: 33, max: 40 },
+    excludeLocations: ['30th-ave', 'sunnyside'],
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 10h16"/><path d="M8 6.2v1.2"/><path d="M8 13.5v3"/></svg>`,
   },
   {
@@ -618,7 +619,7 @@ function renderLanding() {
   document.getElementById('root').innerHTML = `
     <div class="landing">
       <h1>Moa Coffee<span style="color:var(--terracotta)"> · </span>Temp Log</h1>
-      <p class="sub">Choose your location. Bookmark this page on your iPad so you don't have to do this again.</p>
+      <p class="sub">Choose your location. Bookmark this page on your iPad.</p>
       <div class="landing-list">
         ${LOCATIONS.map(loc => `
           <a href="?loc=${loc.id}" class="landing-link" onclick="event.preventDefault(); goToLocation('${loc.id}')">
@@ -628,7 +629,7 @@ function renderLanding() {
         `).join('')}
       </div>
       <div class="landing-note">
-        <strong>Tip:</strong> On each iPad, open that location's link and add it to the home screen (Safari → Share → Add to Home Screen). The barista taps it like an app.
+        <strong>Tip:</strong> On each iPad, open that location's link and add it to the home screen (Safari → Share → Add to Home Screen).
       </div>
     </div>
   `;
@@ -640,6 +641,10 @@ try { knownNames = JSON.parse(localStorage.getItem(STORAGE_KEY_NAMES) || '[]'); 
 let savedName = localStorage.getItem(STORAGE_KEY_NAME) || '';
 
 // ============ APP RENDER ============
+// Fridges shown at the current location — some shops don't have every fridge.
+function activeFridges() {
+  return FRIDGES.filter(f => !(f.excludeLocations || []).includes(currentLocation.id));
+}
 function renderApp() {
   document.getElementById('root').innerHTML = `
     <div class="app">
@@ -666,7 +671,7 @@ function renderApp() {
       </div>
 
       <div class="fridge-list">
-        ${FRIDGES.map(f => renderFridgeRow(f)).join('')}
+        ${activeFridges().map(f => renderFridgeRow(f)).join('')}
       </div>
 
       <div class="notes-block" id="notesBlock">
@@ -802,7 +807,7 @@ function refreshNotesBlock() {
   const block = document.getElementById('notesBlock');
   const inputsHost = document.getElementById('notesInputs');
   if (!block || !inputsHost) return;
-  const outFridges = FRIDGES.filter(f => {
+  const outFridges = activeFridges().filter(f => {
     const v = document.getElementById(`temp-${f.id}`).value.trim();
     if (!v) return false;
     return tempStatus(v, f.target).cls === 'out-of-range';
@@ -832,12 +837,12 @@ function refreshSubmitButton() {
   const label = document.getElementById('submitLabel');
   const count = document.getElementById('submitCount');
   if (!btn) return;
-  const filled = FRIDGES.filter(f => document.getElementById(`temp-${f.id}`).value.trim() !== '');
+  const filled = activeFridges().filter(f => document.getElementById(`temp-${f.id}`).value.trim() !== '');
   count.textContent = filled.length;
   if (filled.length === 0) {
     btn.disabled = true;
     label.textContent = 'Log temperatures';
-  } else if (filled.length === FRIDGES.length) {
+  } else if (filled.length === activeFridges().length) {
     btn.disabled = false;
     label.textContent = 'Log all temperatures';
   } else {
@@ -854,7 +859,7 @@ function submitAll() {
     showToast('Type your name first', true);
     return;
   }
-  const filled = FRIDGES
+  const filled = activeFridges()
     .map(f => ({ fridge: f, val: document.getElementById(`temp-${f.id}`).value.trim() }))
     .filter(x => x.val !== '');
   if (filled.length === 0) {
@@ -926,7 +931,7 @@ function submitAll() {
   localStorage.setItem(STORAGE_KEY_NAME, name);
 
   // Reset inputs
-  FRIDGES.forEach(f => {
+  activeFridges().forEach(f => {
     const t = document.getElementById(`temp-${f.id}`);
     const fb = document.getElementById(`feedback-${f.id}`);
     const row = document.getElementById(`row-${f.id}`);
@@ -969,7 +974,7 @@ function refreshLastLabel(fridgeId) {
   el.textContent = last ? `· last ${last.temp}°F at ${last.time}` : '';
 }
 function refreshAll() {
-  FRIDGES.forEach(f => refreshLastLabel(f.id));
+  activeFridges().forEach(f => refreshLastLabel(f.id));
   renderSyncStatus();
 }
 function renderLogs() {
