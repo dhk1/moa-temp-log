@@ -372,21 +372,6 @@ header {
   align-items: center;
   justify-content: space-between;
 }
-.export-btn {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-style: normal;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: transparent;
-  border: none;
-  color: var(--terracotta);
-  cursor: pointer;
-  padding: 4px 0;
-}
-.export-btn:hover { color: var(--terracotta-dark); }
-
 .sync-status {
   display: none;
   font-family: 'IBM Plex Sans', sans-serif;
@@ -689,7 +674,6 @@ function renderApp() {
       <div class="logs-section">
         <div class="logs-heading">
           <span>Today's log <span class="sync-status" id="syncStatus" onclick="manualSync()"></span></span>
-          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
         </div>
         <div id="logsContainer">
           <div class="log-empty">No entries yet today.</div>
@@ -1109,26 +1093,6 @@ function showToast(msg, isError) {
   toast.classList.add('visible');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
-}
-
-// ============ EXPORT ============
-function exportCSV() {
-  const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS) || '[]')
-    .filter(l => l.location === currentLocation.id);
-  if (logs.length === 0) { showToast('No logs to export yet', true); return; }
-  const headers = ['Timestamp', 'Date', 'Time', 'Location', 'Fridge', 'Name', 'Temp (°F)', 'Status', 'Notes'];
-  const rows = logs.map(l => [l.timestamp, l.date, l.time, l.locationName, l.fridgeName, l.name, l.temp, l.status, l.notes]);
-  const csv = [headers, ...rows]
-    .map(r => r.map(c => `"${String(c == null ? '' : c).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `moa-temp-log-${currentLocation.id}-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast(`✓ Exported ${logs.length} entries`);
 }
 
 // ============ BOOTSTRAP ============
