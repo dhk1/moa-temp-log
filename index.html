@@ -661,7 +661,7 @@ function renderApp() {
       </div>
 
       <div class="notes-block" id="notesBlock">
-        <div class="head"><span>⚠ Out of range — corrective action required</span></div>
+        <div class="head"><span>⚠ Out of range — please communicate to manager</span></div>
         <div id="notesInputs"></div>
       </div>
 
@@ -825,7 +825,7 @@ function refreshNotesBlock() {
   });
   inputsHost.innerHTML = outFridges.map(f => `
     <input type="text" class="notes-input" id="notes-${f.id}"
-      placeholder="${escapeAttr(f.name)} — corrective action (e.g. adjusted thermostat, moved items)"
+      placeholder="${escapeAttr(f.name)} — Notes (eg. defrost cycle, left fridge door open, milk storing, etc)"
       value="${escapeAttr(existing[f.id] || '')}">
   `).join('');
 }
@@ -872,7 +872,7 @@ function submitAll() {
       const n = document.getElementById(`notes-${fridge.id}`);
       if (!n || !n.value.trim()) {
         if (n) n.focus();
-        showToast(`Add corrective action for ${fridge.name}`, true);
+        showToast(`Add a note for ${fridge.name}`, true);
         return;
       }
     }
