@@ -269,14 +269,30 @@ header {
   pointer-events: none;
 }
 
-/* ─────── NOTES (inline, when needed) ─────── */
+/* ─────── USE NOTE (instruction near top) ─────── */
+.use-note {
+  margin: 0 0 14px;
+  background: var(--cream-light);
+  border: 1px solid var(--cream-dark);
+  border-left: 3px solid var(--terracotta);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--espresso-soft);
+}
+.use-note strong { color: var(--espresso); font-weight: 600; }
+
+/* ─────── NOTES (inline) ─────── */
 .notes-block {
   display: none;
   margin: 8px 0 16px;
-  background: var(--red-soft);
+  background: var(--cream-light);
+  border: 1px solid var(--cream-dark);
   border-radius: 12px;
   padding: 12px 14px;
 }
+.notes-block.alert { background: var(--red-soft); border-color: transparent; }
 .notes-block.visible { display: block; animation: slideIn 0.25s; }
 .notes-block .head {
   display: flex;
@@ -284,11 +300,12 @@ header {
   gap: 8px;
   margin-bottom: 8px;
   font-size: 10.5px;
-  color: var(--red);
+  color: var(--espresso-soft);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+.notes-block.alert .head { color: var(--red); }
 .notes-block .which {
   background: white;
   color: var(--red);
@@ -310,7 +327,8 @@ header {
   margin-bottom: 6px;
 }
 .notes-input:last-child { margin-bottom: 0; }
-.notes-input:focus { border-color: var(--red); }
+.notes-input:focus { border-color: var(--espresso); }
+.notes-input.required { border-color: var(--red); }
 
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(4px); }
@@ -645,6 +663,8 @@ function renderApp() {
         <div class="date-time" id="dateTime">—</div>
       </div>
 
+      <div class="use-note">Please use the <strong>dial/analog thermometer</strong> placed inside the fridge — <strong>not</strong> the digital fridge thermometer.</div>
+
       <div class="name-bar">
         <div class="name-label">Logged by</div>
         <div class="name-input-wrap">
@@ -662,7 +682,7 @@ function renderApp() {
       </div>
 
       <div class="notes-block" id="notesBlock">
-        <div class="head"><span>⚠ Out of range — please communicate to manager</span></div>
+        <div class="head"><span id="notesHead">Notes</span></div>
         <div id="notesInputs"></div>
       </div>
 
@@ -807,28 +827,33 @@ function refreshNotesBlock() {
   const block = document.getElementById('notesBlock');
   const inputsHost = document.getElementById('notesInputs');
   if (!block || !inputsHost) return;
-  const outFridges = activeFridges().filter(f => {
-    const v = document.getElementById(`temp-${f.id}`).value.trim();
-    if (!v) return false;
-    return tempStatus(v, f.target).cls === 'out-of-range';
-  });
-  if (outFridges.length === 0) {
-    block.classList.remove('visible');
+  // A note field for every filled fridge: required if out of range, optional otherwise.
+  const filled = activeFridges().filter(f => document.getElementById(`temp-${f.id}`).value.trim() !== '');
+  if (filled.length === 0) {
+    block.classList.remove('visible', 'alert');
     inputsHost.innerHTML = '';
     return;
   }
+  const isOutOfRange = f => tempStatus(document.getElementById(`temp-${f.id}`).value, f.target).cls === 'out-of-range';
+  const anyOutOfRange = filled.some(isOutOfRange);
   block.classList.add('visible');
-  // Preserve existing values
+  block.classList.toggle('alert', anyOutOfRange);
+  document.getElementById('notesHead').textContent = anyOutOfRange
+    ? '⚠ Out of range — please communicate to manager'
+    : 'Notes (optional)';
+  // Preserve existing values across re-renders
   const existing = {};
-  outFridges.forEach(f => {
+  filled.forEach(f => {
     const e = document.getElementById(`notes-${f.id}`);
     if (e) existing[f.id] = e.value;
   });
-  inputsHost.innerHTML = outFridges.map(f => `
-    <input type="text" class="notes-input" id="notes-${f.id}"
-      placeholder="${escapeAttr(f.name)} — Notes (eg. defrost cycle, left fridge door open, milk storing, etc)"
-      value="${escapeAttr(existing[f.id] || '')}">
-  `).join('');
+  inputsHost.innerHTML = filled.map(f => {
+    const required = isOutOfRange(f);
+    const ph = required
+      ? `${f.name} — required: out of range, tell a manager`
+      : `${f.name} — optional note (eg. defrost cycle, door left open, restocking)`;
+    return `<input type="text" class="notes-input${required ? ' required' : ''}" id="notes-${f.id}" placeholder="${escapeAttr(ph)}" value="${escapeAttr(existing[f.id] || '')}">`;
+  }).join('');
 }
 
 // ============ SUBMIT BUTTON STATE ============
@@ -941,7 +966,7 @@ function submitAll() {
     fb.textContent = '';
     row.classList.remove('has-value');
   });
-  document.getElementById('notesBlock').classList.remove('visible');
+  document.getElementById('notesBlock').classList.remove('visible', 'alert');
   document.getElementById('notesInputs').innerHTML = '';
   // Clear the name too — shared iPads, so the next barista enters their own.
   document.getElementById('nameInput').value = '';
