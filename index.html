@@ -83,7 +83,9 @@ header {
   padding: 6px 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  cursor: pointer;
 }
+.location-pill:active { opacity: 0.7; }
 
 /* ─────── DATE STRIP ─────── */
 .date-strip {
@@ -663,7 +665,7 @@ function renderApp() {
     <div class="app">
       <header>
         <div class="brand">Moa Coffee<span class="dot">·</span><span class="sub">Temp Log</span></div>
-        <div class="location-pill">${currentLocation.short}</div>
+        <div class="location-pill" onclick="renderLanding()" title="Tap to change location">${currentLocation.short} ▾</div>
       </header>
 
       <div class="date-strip">
